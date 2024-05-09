@@ -7,6 +7,7 @@ The goal for this system is to figure out how full a waste bin is in percentage.
 ## Circuit Requirements
 
 ### Components:
+- Bread Board
 - Green LED, red LED, Resistor x2
 - Button Module x2
 - LED Bar Module
@@ -15,27 +16,32 @@ The goal for this system is to figure out how full a waste bin is in percentage.
 
 #### LEDs and Resitors
 <p align="center">
-<img src="Images/mockup.png" alt="Image of GUI Mockup">
+<img src="Images/IMG_1771.jpg" alt="Image of GUI Mockup">
 </p>
 
 #### Button Modules
 <p align="center">
-<img src="Images/mockup.png" alt="Image of GUI Mockup">
+<img src="Images/IMG_1773.jpg" alt="Image of GUI Mockup">
 </p>
 
 #### LED Bar Module
 <p align="center">
-<img src="Images/mockup.png" alt="Image of GUI Mockup">
+<img src="Images/IMG_1776.jpg" alt="Image of GUI Mockup">
 </p>
 
 #### Ultrasonic Distance Sensor
 <p align="center">
-<img src="Images/mockup.png" alt="Image of GUI Mockup">
+<img src="Images/IMG_1770.jpg" alt="Image of GUI Mockup">
 </p>
 
 #### Active Buzzer
 <p align="center">
-<img src="Images/mockup.png" alt="Image of GUI Mockup">
+<img src="Images/IMG_1778.jpg" alt="Image of GUI Mockup">
+</p>
+
+#### Bread Board
+<p align="center">
+<img src="Images/IMG_1777.jpg" alt="Image of GUI Mockup">
 </p>
 
 ## GUI Mockup
@@ -45,5 +51,5 @@ The goal for this system is to figure out how full a waste bin is in percentage.
 
 ## Block Diagram
 <p align="center">
-<img src="Images/mockup.png" alt="Image of Block Diagram">
+<img src="Images/Iot_Block_Diagram.png" alt="Image of Block Diagram">
 </p>
