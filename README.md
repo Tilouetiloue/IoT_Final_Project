@@ -8,7 +8,7 @@ The goal for this system is to figure out how full a waste bin is in percentage.
 
 ### Components:
 - Bread Board
-- Green LED, red LED, Resistor x2
+- Green LED, red LED, Resistor x3
 - Button Module x2
 - LED Bar Module
 - Ultrasonic Distance Sensor
