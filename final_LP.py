@@ -13,7 +13,13 @@ class Application(Frame) :
         # Pins
         self.DATA_Pin = 16
         self.CLK_Pin  = 20
-
+        self.SENSOR_OUT = 23
+        self.SENSOR_IN = 24
+        self.GREEN_LED = 19
+        self.RED_LED = 26
+        self.RED_BUTTON = 27
+        self.BLUE_BUTTON = 22
+        self.BUZZER = 13
         # Global Variables
         self.num_leds = 0
         self.max_leds = 10
@@ -42,18 +48,20 @@ class Application(Frame) :
         
     # Setting up GPIO
     def setup(self):
+        # Setmode and warnings
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
-        GPIO.setup(23,GPIO.OUT,initial=GPIO.LOW)
-        GPIO.setup(24,GPIO.IN)
-        GPIO.setup(19,GPIO.OUT)
-        GPIO.setup(26,GPIO.OUT)
-        GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(13, GPIO.OUT)
+        # Setting up pins
+        GPIO.setup(self.SENSOR_OUT,GPIO.OUT,initial=GPIO.LOW)
+        GPIO.setup(self.SENSOR_IN,GPIO.IN)
+        GPIO.setup(self.GREEN_LED,GPIO.OUT)
+        GPIO.setup(self.RED_LED,GPIO.OUT)
+        GPIO.setup(self.RED_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BLUE_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUZZER, GPIO.OUT)
         GPIO.setup(self.DATA_Pin, GPIO.OUT)
         GPIO.setup(self.CLK_Pin,  GPIO.OUT)
-
+        # Setting default outputs
         GPIO.output(self.DATA_Pin, GPIO.LOW)
         GPIO.output(self.CLK_Pin,  GPIO.LOW)
         GPIO.output(26,GPIO.HIGH)
@@ -90,12 +98,16 @@ class Application(Frame) :
         self.warningLabel.grid(row=4, column=0, sticky='w')
     
     # Functions
+
+    # Process that runs every second
     def process(self):
         self.checkdist()
         self.checkthreshold()
         self.after(1000, self.process)
     
+    # Function to check distance of waste and authorized access
     def checkdist(self):
+        # Emit ultrasonic sound
         GPIO.output(23, GPIO.HIGH)
         time.sleep(0.000015)
         GPIO.output(23, GPIO.LOW)
@@ -105,8 +117,10 @@ class Application(Frame) :
         while GPIO.input(24):
             pass
         t2 = time.time()
+        # Calculating distance
         distance = (t2-t1)*340/2
         print(distance)
+        # Check if the bin has authorized access or not
         if(self.is_locked and distance > self.bin_size):
             self.buzz(2)
             self.warning("Unauthorized access to waste bin")
@@ -114,16 +128,20 @@ class Application(Frame) :
             waste = self.bin_size - distance
             percentage = (waste/self.bin_size) * 100
             self.checkleds(percentage)
-            
+    
+    # Red Button callback function to enter password
     def button_callback_red(self, channel):
         self.beep()
+        # Add inputs to password
         if not (self.passwd_clicks == len(self.password)):
             self.passwd_clicks += 1
             self.input_password += str(1)
         else:
+            # Check if passwords match
             if(self.input_password == self.password):
                 self.input_password = ""
                 self.passwd_clicks = 0
+                # Lock or Unlock
                 if(self.is_locked):
                     self.is_locked = False
                     GPIO.output(26, GPIO.LOW)
@@ -133,20 +151,25 @@ class Application(Frame) :
                     GPIO.output(26, GPIO.HIGH)
                     GPIO.output(19, GPIO.LOW)
             else:
+                # Incorrect sequence
                 self.buzz(1)
                 self.input_password = ""
                 self.passwd_clicks = 0
                 self.warning("Wrong button sequence")
 
+    # Blue Button callback function to enter password
     def button_callback_blue(self, channel):
         self.beep()
+        # Add inputs to password
         if not (self.passwd_clicks == len(self.password)):
             self.passwd_clicks += 1
             self.input_password += str(0)
         else:
+            # Check if passwords match
             if(self.input_password == self.password):
                 self.input_password = ""
                 self.passwd_clicks = 0
+                # Lock or Unlock
                 if(self.is_locked):
                     self.is_locked = False
                     GPIO.output(26, GPIO.LOW)
@@ -156,26 +179,33 @@ class Application(Frame) :
                     GPIO.output(26, GPIO.HIGH)
                     GPIO.output(19, GPIO.LOW)
             else:
+                # Incorrect sequence
                 self.buzz(1)
                 self.input_password = ""
                 self.passwd_clicks = 0
                 self.warning("Wrong button sequence")
-        
+    
+    # Function that beeps the buzzer
     def beep(self):
         GPIO.output(13, GPIO.HIGH)
         time.sleep(0.1)
         GPIO.output(13, GPIO.LOW)
-        
+    
+    # Function that sounds the buzzer for given time
     def buzz(self, duration):
         GPIO.output(13, GPIO.HIGH)
         time.sleep(duration)
         GPIO.output(13, GPIO.LOW)
     
+    # Function to open warning window
     def warning(self, message):
         messagebox.showwarning("Warning", message)
     
+    # Function to open bar LED, LEDs based on percentage
     def checkleds(self, percentage):
+        # Default LED state
         LEDstate = 0b0000000000
+        # Checking which state is needed
         if(10 < percentage < 20):
             LEDstate = 0b1
         elif(20 < percentage < 30):
@@ -197,9 +227,11 @@ class Application(Frame) :
         elif(percentage >= 100):
             LEDstate = 0b1111111111
         
+        # Setting visual indicators
         self.setledbar(LEDstate)
         self.setwastelabel(percentage)
     
+    # Function to check level of waste depending on threshold, warning when needed
     def checkthreshold(self):
         current_percentage = float(self.wasteLevelLabel["text"].rstrip("%"))
         if (current_percentage >= self.threshold):
@@ -207,6 +239,7 @@ class Application(Frame) :
         else:
             self.warningLabel.config(text="Warning: ")
     
+    # Function to save Threshold
     def savethreshold(self):
         try:
             set_threshold = float(self.entry_threshold.get())
@@ -214,16 +247,19 @@ class Application(Frame) :
             self.threshold = set_threshold
         except:
             self.warning("Invalid Input, need a number")
-        
+    
+    # Function to send data to LED bar
     def setledbar(self, LEDstate):
         self.send16bitData(self.CmdMode)
         self.sendLED(LEDstate)
         self.latchData()
     
+    # Function to set the waste level label
     def setwastelabel(self, percentage):
         waste_level = "{:.1%}".format(percentage / 100)
         self.wasteLevelLabel.config(text=waste_level)
     
+    # Function to save bin size
     def savesize(self):
         try:
             set_size = float(self.entry_bin_size.get())
@@ -231,7 +267,7 @@ class Application(Frame) :
             self.bin_size = set_size
         except:
             self.warning("Invalid Input, need a number")
-        
+    
     def send16bitData(self, data):
         for i in range(0, 16):
             if data & 0x8000:

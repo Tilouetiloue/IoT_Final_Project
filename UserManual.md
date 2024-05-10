@@ -33,3 +33,4 @@ DO NOT press buttons on case of incorrect codes. #4 of ERROR Cases will cover mo
 
 4. Invalid Inputs
     This error occurs when user does not input valid inputs for threshold or bin size. It is important to note that these fields only take number inputs. If letters are present, the input will be rejected, no changes will be made and a warning window will pop-up indicating incorrect inputs.
+    Ex. Inputting 50 for threshold will set the percentage threshold to 50%, inputting 30 in bin size will make bin size equal to 30 meters
